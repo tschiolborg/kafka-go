@@ -12,12 +12,24 @@ func main() {
 		fmt.Println("Failed to bind to port 9092")
 		os.Exit(1)
 	}
-	c, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
+	defer l.Close()
+
+	for {
+		c, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+		fmt.Println("Successfully bound to port 9092 and accepted a connection")
+
+		go handle(c)
+
 	}
-	fmt.Println("Successfully bound to port 9092 and accepted a connection")
+}
+
+func handle(c net.Conn) {
+	defer c.Close()
+	fmt.Println("Handling connection")
 
 	buf := make([]byte, 1024)
 	for {
@@ -42,8 +54,4 @@ func main() {
 			break
 		}
 	}
-	c.Close()
-	l.Close()
-	fmt.Println("Connection closed")
-
 }
