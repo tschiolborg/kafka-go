@@ -19,7 +19,6 @@ func main() {
 	}
 	fmt.Println("Successfully bound to port 9092 and accepted a connection")
 
-	// Make sure to use buf[:n] slice to avoid reading stale data
 	buf := make([]byte, 1024)
 	for {
 		n, err := c.Read(buf)
@@ -27,9 +26,24 @@ func main() {
 			fmt.Println("Error reading from connection: ", err.Error())
 			break
 		}
-		if n > 0 {
-			fmt.Printf("Received data: %s\n", string(buf[:n]))
+		if n <= 0 {
+			continue
+		}
+		received := buf[:n]
+		fmt.Printf("Received data: %s\n", string(received))
+
+		messageSize := []byte{0, 0, 0, 0}
+		correlationId := []byte{0, 0, 0, 7}
+
+		response := append(messageSize, correlationId...)
+		_, err = c.Write(response)
+		if err != nil {
+			fmt.Println("Error writing to connection: ", err.Error())
+			break
 		}
 	}
+	c.Close()
+	l.Close()
+	fmt.Println("Connection closed")
 
 }

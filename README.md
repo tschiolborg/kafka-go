@@ -7,5 +7,7 @@
 go run ./app
 go build -o ./bin/app ./app
 
+nc -vx localhost 9092
+
 golangci-lint run
 ```
