@@ -44,8 +44,12 @@ func handle(c net.Conn) {
 		received := buf[:n]
 		fmt.Printf("Received data: %s\n", string(received))
 
+		if len(received) < 12 {
+			fmt.Println("Received data is too short, expected at least 12 bytes")
+			continue
+		}
 		messageSize := []byte{0, 0, 0, 0}
-		correlationId := []byte{0, 0, 0, 7}
+		correlationId := received[8:12]
 
 		response := append(messageSize, correlationId...)
 		_, err = c.Write(response)
